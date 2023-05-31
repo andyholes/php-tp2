@@ -2,10 +2,9 @@
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-require 'controller/GenreController';
-
 // Crea una instancia de la clase Db y GenreController
 $db->getDb();
+require __DIR__ . '/../controller/GenreController.php';
 $genreController = new GenreController($db);
 
 // Define las rutas en el objeto de la aplicación Slim
@@ -19,13 +18,13 @@ $app->get('/genres', function (Request $request, Response $response) use ($genre
 });
 
 $app->post('/genres', function (Request $request, Response $response) use ($genreController) {
-    $data = $request->getParsedBody();
+    $data = json_decode($request->getBody()->getContents(), true);
 
-    if (empty($data['name'])) {
-        throw new Exception('El campo "name" es requerido');
+    if (empty($data['nombre'])) {
+        return $response->withStatus(400)->getBody()->write('El campo "nombre" no puede estar vacio');
     }
 
-    $genre = $genreController->createGenre($data['name']);
+    $genre = $genreController->createGenre($data['nombre']);
 
     $response = $response->withHeader('Content-Type', 'application/json');
     $response->getBody()->write(json_encode($genre));
@@ -37,11 +36,11 @@ $app->put('/genres/{id}', function (Request $request, Response $response, array 
     $id = $args['id'];
     $data = $request->getParsedBody();
 
-    if (empty($data['name'])) {
-        throw new Exception('El campo "name" es requerido');
+    if (empty($data['nombre'])) {
+        throw new Exception('El campo "nombre" es requerido');
     }
 
-    $genre = $genreController->updateGenre($id, $data['name']);
+    $genre = $genreController->updateGenre($id, $data['nombre']);
 
     $response = $response->withHeader('Content-Type', 'application/json');
     $response->getBody()->write(json_encode($genre));

@@ -12,33 +12,33 @@ class PlatformController {
 
         $platforms = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $platform = new Platform($row['id'], $row['name']);
+            $platform = new Platform($row['id'], $row['nombre']);
             $platforms[] = $platform;
         }
 
         return $platforms;
     }
 
-    public function createPlatform($name) {
-        $query = "INSERT INTO platforms (name) VALUES (:name)";
+    public function createPlatform($nombre) {
+        $query = "INSERT INTO platforms (nombre) VALUES (:nombre)";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':nombre', $nombre);
         $stmt->execute();
 
         $id = $this->db->lastInsertId();
-        $platform = new Platform($id, $name);
+        $platform = new Platform($id, $nombre);
 
         return $platform;
     }
 
-    public function updatePlatform($id, $name) {
-        $query = "UPDATE platforms SET name = :name WHERE id = :id";
+    public function updatePlatform($id, $nombre) {
+        $query = "UPDATE platforms SET nombre = :nombre WHERE id = :id";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':nombre', $nombre);
         $stmt->bindParam(':id', $id);
         $stmt->execute();
 
-        $platform = new Platform($id, $name);
+        $platform = new Platform($id, $nombre);
 
         return $platform;
     }
