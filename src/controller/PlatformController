@@ -1,0 +1,52 @@
+<?php
+class PlatformController {
+    private $db;
+
+    public function __construct($db) {
+        $this->db = $db;
+    }
+
+    public function getAllPlatforms() {
+        $query = "SELECT * FROM platforms";
+        $stmt = $this->db->query($query);
+
+        $platforms = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $platform = new Platform($row['id'], $row['name']);
+            $platforms[] = $platform;
+        }
+
+        return $platforms;
+    }
+
+    public function createPlatform($name) {
+        $query = "INSERT INTO platforms (name) VALUES (:name)";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':name', $name);
+        $stmt->execute();
+
+        $id = $this->db->lastInsertId();
+        $platform = new Platform($id, $name);
+
+        return $platform;
+    }
+
+    public function updatePlatform($id, $name) {
+        $query = "UPDATE platforms SET name = :name WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+
+        $platform = new Platform($id, $name);
+
+        return $platform;
+    }
+
+    public function deletePlatform($id) {
+        $query = "DELETE FROM platforms WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+    }
+}

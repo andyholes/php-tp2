@@ -1,0 +1,43 @@
+<?php
+class GenreController {
+    private $db;
+
+    public function __construct($db) {
+        $this->db = $db;
+    }
+
+    public function createGenre($name) {
+        $query = "INSERT INTO generos (nombre) VALUES (?)";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$name]);
+
+        $genreId = $this->db->lastInsertId();
+        return new Genre($genreId, $name);
+    }
+
+    public function updateGenre($id, $name) {
+        $query = "UPDATE generos SET nombre = ? WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$name, $id]);
+
+        return new Genre($id, $name);
+    }
+
+    public function getAllGenres() {
+        $query = "SELECT * FROM generos";
+        $stmt = $this->db->query($query);
+
+        $genres = [];
+        while ($row = $stmt->fetch()) {
+            $genres[] = new Genre($row['id'], $row['nombre']);
+        }
+
+        return $genres;
+    }
+
+    public function deleteGenre($id) {
+        $query = "DELETE FROM generos WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$id]);
+    }
+}
