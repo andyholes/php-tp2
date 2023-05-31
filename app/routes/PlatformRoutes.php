@@ -13,45 +13,53 @@ $app->get('/platforms', function (Request $request, Response $response) use ($pl
 
     $response = $response->withHeader('Content-Type', 'application/json');
     $response->getBody()->write(json_encode($platforms));
-
     return $response->withStatus(200);
 });
 
 $app->post('/platforms', function (Request $request, Response $response) use ($platformController) {
-    $data = $request->getParsedBody();
+    $data = json_decode($request->getBody()->getContents(), true);
 
     if (empty($data['nombre'])) {
-        throw new Exception('El campo "nombre" es requerido');
+        $response->getBody()->write('Ingrese un nombre valido');
+        return $response->withStatus(400);
     }
 
     $platform = $platformController->createPlatform($data['nombre']);
 
     $response = $response->withHeader('Content-Type', 'application/json');
     $response->getBody()->write(json_encode($platform));
-
     return $response->withStatus(201);
 });
 
 $app->put('/platforms/{id}', function (Request $request, Response $response, array $args) use ($platformController) {
     $id = $args['id'];
-    $data = $request->getParsedBody();
+    $data = json_decode($request->getBody()->getContents(), true);
+
+    if(!$platformController->existsById($id)){
+        $response->getBody()->write("No existe plataforma con id ". $id);
+        return $response->withStatus(404);
+    }
 
     if (empty($data['nombre'])) {
-        throw new Exception('El campo "nombre" es requerido');
+        $response->getBody()->write('Ingrese un nombre valido');
+        return $response->withStatus(400);
     }
 
     $platform = $platformController->updatePlatform($id, $data['nombre']);
 
     $response = $response->withHeader('Content-Type', 'application/json');
     $response->getBody()->write(json_encode($platform));
-
     return $response->withStatus(200);
 });
 
 $app->delete('/platforms/{id}', function (Request $request, Response $response, array $args) use ($platformController) {
     $id = $args['id'];
 
-    $platformController->deletePlatform($id);
+    if(!$platformController->existsById($id)){
+        $response->getBody()->write("No existe plataforma con id ". $id);
+        return $response->withStatus(404);
+    }
 
+    $platformController->deletePlatform($id);
     return $response->withStatus(204);
 });

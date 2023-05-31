@@ -7,7 +7,7 @@ $db->getDb();
 require __DIR__ . '/../controller/GenreController.php';
 $genreController = new GenreController($db);
 
-// Define las rutas en el objeto de la aplicación Slim
+// Define las rutas para los generos
 $app->get('/genres', function (Request $request, Response $response) use ($genreController) {
     $genres = $genreController->getAllGenres();
 
@@ -36,7 +36,7 @@ $app->put('/genres/{id}', function (Request $request, Response $response, array 
     $data = json_decode($request->getBody()->getContents(), true);
 
     if(!$genreController->existsById($id)){
-        $response->getBody()->write("No existe elemento con el id numero ". $id);
+        $response->getBody()->write("No existe genero con id ". $id);
         return $response->withStatus(404);
     }
 
@@ -56,7 +56,7 @@ $app->delete('/genres/{id}', function (Request $request, Response $response, arr
     $id = $args['id'];
 
     if(!$genreController->existsById($id)){
-        $response->getBody()->write("No existe elemento con el id numero ". $id);
+        $response->getBody()->write("No existe genero con id ". $id);
         return $response->withStatus(404);
     }
 

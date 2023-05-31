@@ -3,50 +3,45 @@ class PlatformController {
     private $db;
 
     public function __construct($db) {
-        $this->db = $db;
+        $this->db = $db->getDb();
     }
 
     public function getAllPlatforms() {
-        $query = "SELECT * FROM platforms";
+        $query = "SELECT * FROM plataformas";
         $stmt = $this->db->query($query);
-
-        $platforms = [];
+        $platforms = array();
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $platform = new Platform($row['id'], $row['nombre']);
+            $platform = array('id' => $row['id'], 'nombre' => $row['nombre']);
             $platforms[] = $platform;
         }
-
         return $platforms;
     }
 
     public function createPlatform($nombre) {
-        $query = "INSERT INTO platforms (nombre) VALUES (:nombre)";
+        $query = "INSERT INTO plataformas (nombre) VALUES (?)";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':nombre', $nombre);
-        $stmt->execute();
-
+        $stmt->execute([$nombre]);
         $id = $this->db->lastInsertId();
-        $platform = new Platform($id, $nombre);
-
-        return $platform;
+        return array('id'=>$id,'nombre'=>$nombre);
     }
 
     public function updatePlatform($id, $nombre) {
-        $query = "UPDATE platforms SET nombre = :nombre WHERE id = :id";
+        $query = "UPDATE plataformas SET nombre = ? WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':nombre', $nombre);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-
-        $platform = new Platform($id, $nombre);
-
-        return $platform;
+        $stmt->execute([$nombre,$id]);
+        return array('id'=>$id,'nombre'=>$nombre);
     }
 
     public function deletePlatform($id) {
-        $query = "DELETE FROM platforms WHERE id = :id";
+        $query = "DELETE FROM plataformas WHERE id = ?";
         $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
+        $stmt->execute([$id]);
+    }
+
+    public function existsById($id){
+        $query = "SELECT id FROM plataformas WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$id]);
+        return ($stmt->rowCount()!=0);
     }
 }
