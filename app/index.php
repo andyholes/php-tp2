@@ -16,5 +16,6 @@ $app->addErrorMiddleware(true, true, true);
 
 require 'routes/GenreRoutes.php';
 require 'routes/PlatformRoutes.php';
+require 'routes/GameRoutes.php';
 
 $app->run();     
