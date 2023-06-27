@@ -63,3 +63,17 @@ $app->delete('/platforms/{id}', function (Request $request, Response $response, 
     $platformController->deletePlatform($id);
     return $response->withStatus(204);
 });
+
+$app->get('/platforms/{id}', function (Request $request, Response $response, array $args) use ($platformController) {
+    $id = $args['id'];
+
+    if(!$platformController->existsById($id)){
+        $response->getBody()->write("No existe plataforma con id ". $id);
+        return $response->withStatus(404);
+    }
+
+    $platform = $platformController->getById($id);
+    
+    $response->getBody()->write($platform);
+    return $response->withStatus(200);
+});

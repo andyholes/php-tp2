@@ -62,4 +62,18 @@ $app->delete('/genres/{id}', function (Request $request, Response $response, arr
 
     $genreController->deleteGenre($id);
     return $response->withStatus(204);
-});
+    });
+
+    $app->get('/genres/{id}', function (Request $request, Response $response, array $args) use ($genreController) {
+        $id = $args['id'];
+    
+        if(!$genreController->existsById($id)){
+            $response->getBody()->write("No existe genero con id ". $id);
+            return $response->withStatus(404);
+        }
+    
+        $genre = $genreController->getById($id);
+        
+        $response->getBody()->write($genre);
+        return $response->withStatus(200);
+    });

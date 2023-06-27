@@ -44,4 +44,12 @@ class PlatformController {
         $stmt->execute([$id]);
         return ($stmt->rowCount()!=0);
     }
+
+    public function getById($id){
+        $query = "SELECT nombre FROM plataformas WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$id]);
+        $platform = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $platform['nombre'];
+    }
 }

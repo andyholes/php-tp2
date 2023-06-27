@@ -46,4 +46,12 @@ class GenreController {
         $stmt->execute([$id]);
         return ($stmt->rowCount()!=0);
     }
+
+    public function getById($id){
+        $query = "SELECT nombre FROM generos WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$id]);
+        $genre = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $genre['nombre'];
+    }
 }
