@@ -42,12 +42,39 @@ class GameController {
         return new Game($id, $name, $image, $type, $desc, $url, $genreId, $platId);
     }
 
-    public function getAllGames() {
-        $query = "SELECT * FROM juegos";
+    public function getAllGames($queryParams) {
+        $query = "SELECT id, nombre, descripcion, imagen, tipo_imagen, url, id_genero, id_plataforma FROM juegos";
+
+        $reciboNombre = (isset($queryParams['nombre']) && ($queryParams['nombre'] != ""));
+        $reciboGenero = (isset($queryParams['genero']) && ($queryParams['genero'] != ""));
+        $reciboPlataforma = (isset($queryParams['plataforma']) && ($queryParams['plataforma'] != ""));
+        $reciboOrden = (isset($queryParams['ordenar']) && ($queryParams['ordenar'] != ""));
+
+        if ($reciboNombre) $nombre = $queryParams['nombre'];
+        if ($reciboGenero) $genero = $queryParams['genero'];
+        if ($reciboPlataforma) $plataforma = $queryParams['plataforma'];
+        if ($reciboOrden) $orden = $queryParams['ordenar'];
+
+        if ($reciboNombre || $reciboGenero || $reciboPlataforma){
+            $query .= " WHERE ";
+        }
+        if ($reciboNombre){
+            $query .= 'J.nombre LIKE "%'. $nombre .'%"';}
+
+        if ($reciboGenero){
+            if ($reciboNombre) {$query .= ' AND ';}
+            $query .= 'J.id_genero = '. $genero;}
+
+        if ($reciboPlataforma){
+            if (($reciboNombre)  || ($reciboGenero)) {$query .= ' AND ';}
+            $query .= 'J.id_plataforma = '. $plataforma;}
+            
+        if (($reciboOrden) && (($orden == "ASC") || ($orden == "DESC"))){
+            $query .= ' ORDER BY J.nombre '. $orden;}
         $stmt = $this->db->query($query);
         $games = array();
         while ($row = $stmt->fetch()) {
-            $game = array('id'=> $row['id'],'nombre'=> $row['nombre'], 'imagen'=>$row['imagen'], 'tipoImagen'=>$row['tipo_imagen'], 'descripcion'=>$row['descripcion'], 'url'=>$row['url'], 'idGenero'=>$row['id_genero'], 'idPlataforma'=>$row['id_plataforma']);
+            $game = array('id'=> $row['id'],'nombre'=> $row['nombre'], 'imagen'=>"\$row['imagen']", 'tipoImagen'=>$row['tipo_imagen'], 'descripcion'=>$row['descripcion'], 'url'=>$row['url'], 'idGenero'=>$row['id_genero'], 'idPlataforma'=>$row['id_plataforma']);
             $games[] = $game;
         }
         return $games;
@@ -57,49 +84,5 @@ class GameController {
         $query = "DELETE FROM juegos WHERE id = ?";
         $stmt = $this->db->prepare($query);
         $stmt->execute([$id]);
-    }
-
-    public function searchGame($name, $genre, $platform, $order) {
-        $query = "SELECT J.nombre, descripcion, imagen, tipo_imagen, url, G.nombre AS genero, P.nombre as plataforma
-        FROM juegos J 
-        JOIN generos G
-        ON J.id_genero = G.id
-        JOIN plataformas P 
-        ON J.id_plataforma = P.id";
-
-        $getName = (isset($name) && ($name != ""));
-        $getGenre = (isset($genre) && ($genre != ""));
-        $getPlatform = (isset($platform) && ($platform != ""));
-        $getOrder = (isset($order) && ($order != ""));
-
-        if ($getName || $getGenre || $getPlatform) {
-            $query .= " WHERE ";
-        }
-        if ($getName){
-            $query .= 'J.nombre LIKE "%'. $name .'%"';
-        }
-        if ($getGenre){
-            if ($getName) {$query .= ' AND ';}
-            $query .= 'J.id_genero = '. $genre;
-        }
-        if ($getPlatform){
-            if (($getName)  || ($getGenre)) {$query .= ' AND ';}
-            $query .= 'J.id_plataforma = '. $platform;
-        }
-        if (($getOrder) && (($order == "ASC") || ($order == "DESC"))){
-            $query .= ' ORDER BY J.nombre '. $order;
-        }
-
-        $stmt = $this->db->query($query);
-        $games = [];
-
-        if ($stmt->rowCount() == 0) {
-            $res = "No hay resultados";
-            return $res; 
-        }
-        else while ($row = $stmt->fetch()) {
-            $games[] = new Game($row['id'], $row['nombre'], $row['imagen'], $row['tipo_imagen'], $row['descripcion'], $row['url'], $row['id_genero'], $row['id_plataforma']);
-            return $games;
-        }
     }
 }

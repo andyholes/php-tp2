@@ -8,15 +8,6 @@ require __DIR__ . '/../controller/GameController.php';
 $gameController = new GameController($db);
 
 // Define las rutas en el objeto de la aplicaciÃ³n Slim
-$app->get('/games', function (Request $request, Response $response) use ($gameController) {
-    $games = $gameController->getAllGames();
-
-    $response = $response->withHeader('Content-Type', 'application/json');
-    $response->getBody()->write(json_encode($games));
-
-    return $response->withStatus(200);
-});
-
 $app->post('/games', function (Request $request, Response $response) use ($gameController) {
     $data = $request->getQueryParams();
 
@@ -86,21 +77,13 @@ $app->delete('/games/{id}', function (Request $request, Response $response, arra
     return $response->withStatus(204);
 });
 
-$app->get('/games/filter', function (Request $request, Response $response, array $args) use ($gameController) {
-    $data = $request->getParsedBody();
+$app->get('/games', function (Request $request, Response $response, array $args) use ($gameController) {
+    $queryParams = $request->getQueryParams();
+    
+    $games = $gameController->getAllGames($queryParams);
 
-    $games = $gameController->searchGame($data['name'], $data['genre'], $data['platform'], $data['order']);
-
-    if ($games = "No hay resultados") {
-        $response = $response->withHeader('content-type', 'application/json');
-        $response->getBody()->write(json_encode($games)); 
-
-        return $response->withStatus(404); 
+    $response = $response->withHeader('content-type', 'application/json');
+    $response->getBody()->write(json_encode($games)); 
+    return $response->withStatus(200);   
     }
-    else {
-        $response = $response->withHeader('content-type', 'application/json');
-        $response->getBody()->write(json_encode($games)); 
-
-        return $response->withStatus(200);   
-    }
-});
+);
